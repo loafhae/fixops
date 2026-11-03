@@ -1,9 +1,11 @@
 import 'dart:typed_data';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:fixops_frontend/core/constants.dart';
 import 'package:fixops_frontend/providers/ticket_provider.dart';
+import 'package:fixops_frontend/widgets/glass_container.dart';
 
 class CreateTicketView extends StatefulWidget {
   const CreateTicketView({super.key});
@@ -66,54 +68,91 @@ class _CreateTicketViewState extends State<CreateTicketView> {
     final ticketProvider = Provider.of<TicketProvider>(context);
 
     return Scaffold(
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
         title: const Text('Report Facility Issue'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppColors.textMain,
+        elevation: 0,
+        flexibleSpace: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withAlpha(160),
+                border: Border(bottom: BorderSide(color: Colors.white.withAlpha(200), width: 1)),
+              ),
+            ),
+          ),
+        ),
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 680),
-            child: Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              elevation: 3,
-              child: Padding(
+      body: GlassBackground(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 700),
+              child: GlassContainer(
+                blur: 24,
+                opacity: 0.82,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white.withAlpha(220), width: 1.5),
                 padding: const EdgeInsets.all(32),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text(
-                        'Submit Maintenance Request',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        'Provide exact location and attach photo evidence for immediate technician dispatch.',
-                        style: TextStyle(fontSize: 13, color: AppColors.textMuted),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [AppColors.primary, AppColors.secondary],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(Icons.add_alert_rounded, color: Colors.white, size: 24),
+                          ),
+                          const SizedBox(width: 14),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Submit Maintenance Request',
+                                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary),
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  'Provide location and attach evidence for quick dispatch.',
+                                  style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                       const Divider(height: 32),
 
                       if (_selectedPriority == 'CRITICAL')
                         Container(
                           margin: const EdgeInsets.only(bottom: 20),
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: Colors.red.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.red.shade300),
+                            color: AppColors.primary.withAlpha(20),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.primary.withAlpha(120), width: 1.2),
                           ),
-                          child: Row(
+                          child: const Row(
                             children: [
-                              const Icon(Icons.warning_amber_rounded, color: Colors.red),
-                              const SizedBox(width: 12),
+                              Icon(Icons.warning_amber_rounded, color: AppColors.primary, size: 22),
+                              SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  'CRITICAL: This ticket will trigger emergency triage for structural, electrical, or physical hazards.',
-                                  style: TextStyle(color: Colors.red.shade900, fontSize: 13, fontWeight: FontWeight.bold),
+                                  'CRITICAL: This report triggers emergency triage for immediate electrical, structural, or life-safety hazards.',
+                                  style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ],
@@ -124,8 +163,8 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                         controller: _titleController,
                         decoration: const InputDecoration(
                           labelText: 'Issue Summary / Title *',
-                          hintText: 'e.g. Exposed live wire, Restroom water leak, Broken chair',
-                          border: OutlineInputBorder(),
+                          hintText: 'e.g. Broken AC unit, live wire exposed, pipe leaking',
+                          prefixIcon: Icon(Icons.title_rounded, color: AppColors.primary),
                         ),
                         validator: (val) => val == null || val.trim().isEmpty ? 'Please enter a title' : null,
                       ),
@@ -138,7 +177,7 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                               initialValue: _selectedCategory,
                               decoration: const InputDecoration(
                                 labelText: 'Category *',
-                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.category_outlined, color: AppColors.primary),
                               ),
                               items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
                               onChanged: (val) => setState(() => _selectedCategory = val!),
@@ -150,7 +189,7 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                               initialValue: _selectedPriority,
                               decoration: const InputDecoration(
                                 labelText: 'Severity / Priority *',
-                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.flag_outlined, color: AppColors.primary),
                               ),
                               items: _priorities.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
                               onChanged: (val) => setState(() => _selectedPriority = val!),
@@ -167,8 +206,8 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                               controller: _buildingController,
                               decoration: const InputDecoration(
                                 labelText: 'Building / Wing *',
-                                hintText: 'e.g. IT Building, Admin Hall',
-                                border: OutlineInputBorder(),
+                                hintText: 'e.g. IT Building',
+                                prefixIcon: Icon(Icons.business_rounded, color: AppColors.primary),
                               ),
                               validator: (val) => val == null || val.trim().isEmpty ? 'Building required' : null,
                             ),
@@ -178,9 +217,9 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                             child: TextFormField(
                               controller: _roomController,
                               decoration: const InputDecoration(
-                                labelText: 'Floor / Room Number *',
+                                labelText: 'Floor / Room *',
                                 hintText: 'e.g. 3rd Floor, Lab 304',
-                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.meeting_room_outlined, color: AppColors.primary),
                               ),
                               validator: (val) => val == null || val.trim().isEmpty ? 'Room required' : null,
                             ),
@@ -193,117 +232,154 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                         controller: _descController,
                         maxLines: 4,
                         decoration: const InputDecoration(
-                          labelText: 'Detailed Description *',
-                          hintText: 'Describe the problem, severity, when it started, and any hazards.',
-                          border: OutlineInputBorder(),
+                          labelText: 'Detailed Description of the Issue *',
+                          hintText: 'Describe what you observe, how severe it is, and any safety precautions needed...',
                         ),
-                        validator: (val) => val == null || val.trim().isEmpty ? 'Description required' : null,
+                        validator: (val) => val == null || val.trim().isEmpty ? 'Please describe the issue' : null,
                       ),
                       const SizedBox(height: 20),
 
-                      // Photo Evidence Section
-                      const Text(
-                        'Photo Evidence (Recommended):',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                      ),
-                      const SizedBox(height: 8),
+                      // Photo Evidence Attachment Box
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300, style: BorderStyle.solid),
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.grey.shade50,
+                          color: AppColors.cream.withAlpha(90),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: AppColors.secondary.withAlpha(90), width: 1),
                         ),
-                        child: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (_photoBytes != null)
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(6),
-                                child: Image.memory(
-                                  _photoBytes!,
-                                  width: 80,
-                                  height: 80,
-                                  fit: BoxFit.cover,
+                            const Row(
+                              children: [
+                                Icon(Icons.camera_alt_outlined, size: 18, color: AppColors.primary),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Photo Evidence (Optional but Recommended)',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textMain),
                                 ),
-                              )
-                            else
-                              Container(
-                                width: 80,
-                                height: 80,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade200,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: const Icon(Icons.add_photo_alternate_outlined, size: 36, color: Colors.grey),
-                              ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            if (_photoBytes != null) ...[
+                              Stack(
                                 children: [
-                                  Text(
-                                    _photoFilename ?? 'No photo selected yet',
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.memory(
+                                      _photoBytes!,
+                                      height: 180,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  const Text(
-                                    'PNG, JPG, or JPEG evidence for technician verification.',
-                                    style: TextStyle(fontSize: 11, color: AppColors.textMuted),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  OutlinedButton.icon(
-                                    icon: const Icon(Icons.camera_alt, size: 16),
-                                    label: Text(_photoBytes == null ? 'Attach Photo' : 'Change Photo'),
-                                    onPressed: _pickPhoto,
+                                  Positioned(
+                                    top: 8,
+                                    right: 8,
+                                    child: CircleAvatar(
+                                      backgroundColor: Colors.black54,
+                                      child: IconButton(
+                                        icon: const Icon(Icons.close, color: Colors.white, size: 18),
+                                        onPressed: () => setState(() {
+                                          _photoBytes = null;
+                                          _photoFilename = null;
+                                        }),
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
+                              const SizedBox(height: 8),
+                              Text('File: $_photoFilename', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                            ] else
+                              OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                                  side: BorderSide(color: AppColors.secondary.withAlpha(120)),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                icon: const Icon(Icons.add_photo_alternate_outlined, color: AppColors.primary),
+                                label: const Text('Attach Incident Photo from Device', style: TextStyle(color: AppColors.textMain)),
+                                onPressed: _pickPhoto,
+                              ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 28),
 
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      // Submit Button
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          gradient: const LinearGradient(
+                            colors: [AppColors.primary, Color(0xFFFF6433)],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withAlpha(90),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
                         ),
-                        onPressed: ticketProvider.isLoading
-                            ? null
-                            : () async {
-                                if (!_formKey.currentState!.validate()) return;
-                                final messenger = ScaffoldMessenger.of(context);
-                                final navigator = Navigator.of(context);
-                                final created = await ticketProvider.createTicket(
-                                  title: _titleController.text,
-                                  description: _descController.text,
-                                  building: _buildingController.text,
-                                  floorRoom: _roomController.text,
-                                  category: _selectedCategory,
-                                  priority: _selectedPriority,
-                                  photoBytes: _photoBytes,
-                                  photoFilename: _photoFilename,
-                                );
-                                if (created != null) {
-                                  messenger.showSnackBar(
-                                    SnackBar(
-                                      backgroundColor: Colors.green.shade800,
-                                      content: Text('Ticket #${created.ticketNumber} submitted successfully!'),
-                                    ),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          ),
+                          onPressed: ticketProvider.isLoading
+                              ? null
+                              : () async {
+                                  if (!_formKey.currentState!.validate()) return;
+
+                                  final messenger = ScaffoldMessenger.of(context);
+                                  final navigator = Navigator.of(context);
+
+                                  final newTicket = await ticketProvider.createTicket(
+                                    title: _titleController.text.trim(),
+                                    description: _descController.text.trim(),
+                                    building: _buildingController.text.trim(),
+                                    floorRoom: _roomController.text.trim(),
+                                    category: _selectedCategory,
+                                    priority: _selectedPriority,
+                                    photoBytes: _photoBytes,
+                                    photoFilename: _photoFilename,
                                   );
-                                  navigator.pop();
-                                }
-                              },
-                        child: ticketProvider.isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                              )
-                            : const Text('Submit Ticket', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+
+                                  if (newTicket != null && mounted) {
+                                    navigator.pop();
+                                    messenger.showSnackBar(
+                                      const SnackBar(
+                                        backgroundColor: AppColors.accentLime,
+                                        content: Text('Facility ticket reported successfully!', style: TextStyle(color: AppColors.textMain)),
+                                      ),
+                                    );
+                                  } else if (mounted) {
+                                    messenger.showSnackBar(
+                                      SnackBar(
+                                        backgroundColor: AppColors.primary,
+                                        content: Text(ticketProvider.errorMessage ?? 'Failed to submit report'),
+                                      ),
+                                    );
+                                  }
+                                },
+                          child: ticketProvider.isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                )
+                              : const Text(
+                                  'Submit Ticket & Alert Facilities',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                        ),
                       ),
                     ],
                   ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fixops_frontend/core/constants.dart';
 import 'package:fixops_frontend/providers/auth_provider.dart';
+import 'package:fixops_frontend/widgets/glass_container.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -31,123 +32,185 @@ class _RegisterViewState extends State<RegisterView> {
     final auth = Provider.of<AuthProvider>(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Create Account'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.textMain,
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 440),
-            child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              child: Padding(
+      body: GlassBackground(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 460),
+              child: GlassContainer(
+                blur: 24,
+                opacity: 0.82,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white.withAlpha(220), width: 1.5),
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 36),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Center(
+                      child: Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [AppColors.secondary, AppColors.accentLime],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(Icons.person_add_alt_1_rounded, color: AppColors.textMain, size: 28),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     const Text(
                       'Join FIXOPS Portal',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     const Text(
-                      'Report broken facilities, request maintenance, and track repair updates in real-time.',
+                      'Register to report and track facility issues',
+                      textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 13, color: AppColors.textMuted),
                     ),
                     const SizedBox(height: 24),
-
-                    if (auth.errorMessage != null)
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        margin: const EdgeInsets.only(bottom: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade50,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.red.shade200),
-                        ),
-                        child: Text(
-                          auth.errorMessage!,
-                          style: TextStyle(color: Colors.red.shade800, fontSize: 13),
-                        ),
-                      ),
-
+                    const Text('Full Name', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textMain)),
+                    const SizedBox(height: 6),
                     TextField(
                       controller: _nameController,
                       decoration: const InputDecoration(
-                        labelText: 'Full Name',
-                        prefixIcon: Icon(Icons.person_outline),
-                        border: OutlineInputBorder(),
+                        hintText: 'e.g. Maria Santos',
+                        prefixIcon: Icon(Icons.badge_outlined, color: AppColors.primary),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 14),
+                    const Text('Email Address', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textMain)),
+                    const SizedBox(height: 6),
                     TextField(
                       controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
-                        labelText: 'Institutional Email',
-                        prefixIcon: Icon(Icons.email_outlined),
-                        border: OutlineInputBorder(),
+                        hintText: 'e.g. maria@fixops.local',
+                        prefixIcon: Icon(Icons.email_outlined, color: AppColors.primary),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 14),
+                    const Text('Department / College', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textMain)),
+                    const SizedBox(height: 6),
                     TextField(
                       controller: _departmentController,
                       decoration: const InputDecoration(
-                        labelText: 'Department / College / Office',
-                        prefixIcon: Icon(Icons.business_outlined),
-                        border: OutlineInputBorder(),
+                        hintText: 'e.g. College of Engineering',
+                        prefixIcon: Icon(Icons.apartment_outlined, color: AppColors.primary),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 14),
+                    const Text('Password', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textMain)),
+                    const SizedBox(height: 6),
                     TextField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
-                        labelText: 'Password',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        border: const OutlineInputBorder(),
+                        hintText: 'Create a password',
+                        prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppColors.primary),
                         suffixIcon: IconButton(
-                          icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                          icon: Icon(
+                            _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                            color: AppColors.textMuted,
+                          ),
                           onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                         ),
                       ),
                     ),
                     const SizedBox(height: 24),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        gradient: const LinearGradient(
+                          colors: [AppColors.primary, Color(0xFFFF6433)],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withAlpha(90),
+                            blurRadius: 14,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
                       ),
-                      onPressed: auth.isLoading
-                          ? null
-                          : () async {
-                              final navigator = Navigator.of(context);
-                              final success = await auth.register(
-                                email: _emailController.text,
-                                fullName: _nameController.text,
-                                password: _passwordController.text,
-                                department: _departmentController.text,
-                              );
-                              if (success) {
-                                navigator.pop();
-                              }
-                            },
-                      child: auth.isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                            )
-                          : const Text('Create Account', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
+                        onPressed: auth.isLoading
+                            ? null
+                            : () async {
+                                final messenger = ScaffoldMessenger.of(context);
+                                final navigator = Navigator.of(context);
+
+                                final name = _nameController.text.trim();
+                                final email = _emailController.text.trim();
+                                final dept = _departmentController.text.trim();
+                                final pass = _passwordController.text;
+
+                                if (name.isEmpty || email.isEmpty || pass.isEmpty) {
+                                  messenger.showSnackBar(
+                                    const SnackBar(content: Text('Please fill all required fields')),
+                                  );
+                                  return;
+                                }
+
+                                final ok = await auth.register(
+                                  email: email,
+                                  password: pass,
+                                  fullName: name,
+                                  department: dept.isEmpty ? 'General' : dept,
+                                );
+
+                                if (ok && mounted) {
+                                  navigator.pop();
+                                  messenger.showSnackBar(
+                                    const SnackBar(
+                                      backgroundColor: AppColors.accentLime,
+                                      content: Text('Account created! You are now logged in.'),
+                                    ),
+                                  );
+                                } else if (mounted) {
+                                  messenger.showSnackBar(
+                                    SnackBar(
+                                      backgroundColor: AppColors.primary,
+                                      content: Text(auth.errorMessage ?? 'Registration failed'),
+                                    ),
+                                  );
+                                }
+                              },
+                        child: auth.isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              )
+                            : const Text(
+                                'Register Account',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
+                      ),
                     ),
                   ],
                 ),
@@ -159,4 +222,3 @@ class _RegisterViewState extends State<RegisterView> {
     );
   }
 }
-

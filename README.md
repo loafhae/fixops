@@ -121,4 +121,3 @@ Facili-Ops/
 ├── run_web.bat               # One-click Windows Flutter web launcher
 └── README.md                 # System documentation
 ```
-
