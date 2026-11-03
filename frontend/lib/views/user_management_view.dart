@@ -42,7 +42,7 @@ class _UserManagementViewState extends State<UserManagementView> {
               const Text('Assigned Role (RBAC):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: selectedRole,
+                initialValue: selectedRole,
                 decoration: const InputDecoration(border: OutlineInputBorder()),
                 items: roles.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
                 onChanged: (val) => setState(() => selectedRole = val!),

@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr
 
 class UserBase(BaseModel):
-    email: EmailStr
+    email: str
     full_name: str
     department: Optional[str] = "General"
 
@@ -12,8 +12,12 @@ class UserCreate(UserBase):
     role: Optional[str] = "USER"
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: Optional[str] = None
+    username: Optional[str] = None
     password: str
+
+    def get_identifier(self) -> str:
+        return (self.username or self.email or "").strip().lower()
 
 class UserResponse(UserBase):
     id: str

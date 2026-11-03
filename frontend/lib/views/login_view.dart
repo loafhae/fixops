@@ -65,13 +65,14 @@ class _LoginViewState extends State<LoginView> {
           ),
           ElevatedButton(
             onPressed: () async {
-              await ApiService().setCustomBaseUrl(serverController.text.trim());
-              if (mounted) {
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Server URL set to: ${serverController.text.trim()}')),
-                );
-              }
+              final messenger = ScaffoldMessenger.of(context);
+              final navigator = Navigator.of(ctx);
+              final newUrl = serverController.text.trim();
+              await ApiService().setCustomBaseUrl(newUrl);
+              navigator.pop();
+              messenger.showSnackBar(
+                SnackBar(content: Text('Server URL set to: $newUrl')),
+              );
             },
             child: const Text('Save'),
           ),
@@ -155,10 +156,10 @@ class _LoginViewState extends State<LoginView> {
 
                     TextField(
                       controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
-                        labelText: 'Email Address',
-                        prefixIcon: Icon(Icons.email_outlined),
+                        labelText: 'Username or Email',
+                        hintText: 'admin, tech, or user',
+                        prefixIcon: Icon(Icons.person_outline),
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -168,6 +169,7 @@ class _LoginViewState extends State<LoginView> {
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
                         labelText: 'Password',
+                        hintText: 'admin, tech, or user',
                         prefixIcon: const Icon(Icons.lock_outline),
                         border: const OutlineInputBorder(),
                         suffixIcon: IconButton(
@@ -201,7 +203,7 @@ class _LoginViewState extends State<LoginView> {
 
                     // Quick Demo Credentials Selector
                     const Text(
-                      'Quick Sign-In (Demo Roles):',
+                      'Quick Sign-In (Demo Credentials):',
                       style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textMuted),
                     ),
                     const SizedBox(height: 8),
@@ -211,18 +213,18 @@ class _LoginViewState extends State<LoginView> {
                       children: [
                         ActionChip(
                           avatar: const Icon(Icons.admin_panel_settings, size: 16, color: Colors.indigo),
-                          label: const Text('Admin', style: TextStyle(fontSize: 11)),
-                          onPressed: () => _fillDemo('admin@fixops.local', 'Admin123!'),
+                          label: const Text('Admin (admin / admin)', style: TextStyle(fontSize: 11)),
+                          onPressed: () => _fillDemo('admin', 'admin'),
                         ),
                         ActionChip(
                           avatar: const Icon(Icons.handyman, size: 16, color: Colors.teal),
-                          label: const Text('Technician', style: TextStyle(fontSize: 11)),
-                          onPressed: () => _fillDemo('tech@fixops.local', 'Tech123!'),
+                          label: const Text('Tech (tech / tech)', style: TextStyle(fontSize: 11)),
+                          onPressed: () => _fillDemo('tech', 'tech'),
                         ),
                         ActionChip(
                           avatar: const Icon(Icons.person, size: 16, color: Colors.blue),
-                          label: const Text('Student/Staff', style: TextStyle(fontSize: 11)),
-                          onPressed: () => _fillDemo('user@fixops.local', 'User123!'),
+                          label: const Text('User (user / user)', style: TextStyle(fontSize: 11)),
+                          onPressed: () => _fillDemo('user', 'user'),
                         ),
                       ],
                     ),

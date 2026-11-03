@@ -130,14 +130,15 @@ class _RegisterViewState extends State<RegisterView> {
                       onPressed: auth.isLoading
                           ? null
                           : () async {
+                              final navigator = Navigator.of(context);
                               final success = await auth.register(
                                 email: _emailController.text,
                                 fullName: _nameController.text,
                                 password: _passwordController.text,
                                 department: _departmentController.text,
                               );
-                              if (success && mounted) {
-                                Navigator.pop(context);
+                              if (success) {
+                                navigator.pop();
                               }
                             },
                       child: auth.isLoading

@@ -135,7 +135,7 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<String>(
-                              value: _selectedCategory,
+                              initialValue: _selectedCategory,
                               decoration: const InputDecoration(
                                 labelText: 'Category *',
                                 border: OutlineInputBorder(),
@@ -147,7 +147,7 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: DropdownButtonFormField<String>(
-                              value: _selectedPriority,
+                              initialValue: _selectedPriority,
                               decoration: const InputDecoration(
                                 labelText: 'Severity / Priority *',
                                 border: OutlineInputBorder(),
@@ -275,6 +275,8 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                             ? null
                             : () async {
                                 if (!_formKey.currentState!.validate()) return;
+                                final messenger = ScaffoldMessenger.of(context);
+                                final navigator = Navigator.of(context);
                                 final created = await ticketProvider.createTicket(
                                   title: _titleController.text,
                                   description: _descController.text,
@@ -285,14 +287,14 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                                   photoBytes: _photoBytes,
                                   photoFilename: _photoFilename,
                                 );
-                                if (created != null && mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                if (created != null) {
+                                  messenger.showSnackBar(
                                     SnackBar(
                                       backgroundColor: Colors.green.shade800,
                                       content: Text('Ticket #${created.ticketNumber} submitted successfully!'),
                                     ),
                                   );
-                                  Navigator.pop(context);
+                                  navigator.pop();
                                 }
                               },
                         child: ticketProvider.isLoading

@@ -46,10 +46,11 @@ class AdminProvider extends ChangeNotifier {
 
   Future<bool> updateUserRole(String userId, String role, {bool? isActive}) async {
     try {
-      await _api.patch('/users/$userId', body: {
-        'role': role,
-        if (isActive != null) 'is_active': isActive,
-      });
+      final body = <String, dynamic>{'role': role};
+      if (isActive != null) {
+        body['is_active'] = isActive;
+      }
+      await _api.patch('/users/$userId', body: body);
       await fetchUsers();
       return true;
     } catch (e) {

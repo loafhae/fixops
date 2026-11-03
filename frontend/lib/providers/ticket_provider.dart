@@ -133,10 +133,11 @@ class TicketProvider extends ChangeNotifier {
 
   Future<bool> updateStatus(String ticketId, String status, {String? notes}) async {
     try {
-      await _api.patch('/tickets/$ticketId/status', body: {
-        'status': status,
-        if (notes != null) 'resolution_notes': notes,
-      });
+      final body = <String, dynamic>{'status': status};
+      if (notes != null) {
+        body['resolution_notes'] = notes;
+      }
+      await _api.patch('/tickets/$ticketId/status', body: body);
       await fetchTickets();
       return true;
     } catch (e) {

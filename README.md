@@ -79,15 +79,15 @@ flutter run -d android
 
 ## 🔑 Default Demo Accounts
 
-The database comes pre-seeded with three accounts representing each role in the system:
+The database comes pre-seeded with simple demo accounts for testing and defense presentations:
 
-| Role | Email Address | Password | Permissions & Views |
+| Role | Username / Email | Password | Permissions & Views |
 | :--- | :--- | :--- | :--- |
-| **System Administrator** | `admin@fixops.local` | `Admin123!` | Full access: Dashboard KPIs, User Management & RBAC, Activity Audit Trail, Ticket Triage |
-| **Maintenance Technician** | `tech@fixops.local` | `Tech123!` | Work Orders: Claim tickets, update status (In Progress / Resolved), log resolution proof |
-| **Student / Staff (End-User)** | `user@fixops.local` | `User123!` | Reporting: Submit maintenance tickets, attach photo evidence, track personal ticket status |
+| **System Administrator** | `admin` *(or `admin@fixops.local`)* | `admin` | Full access: Dashboard KPIs, User Management & RBAC, Activity Audit Trail, Full Ticket Triage |
+| **Maintenance Technician** | `tech` *(or `tech@fixops.local`)* | `tech` | Work Orders: Claim tickets, update status (In Progress / Resolved), log resolution proof |
+| **Student / Staff (End-User)** | `user` *(or `user@fixops.local`)* | `user` | Reporting: Submit maintenance tickets, attach photo evidence, track personal ticket status |
 
-*(Quick-login chips are provided on the login screen for instant testing during presentations).*
+*(Quick-login chips are also provided on the sign-in screen to autofill these credentials with a single tap).*
 
 ---
 

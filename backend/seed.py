@@ -12,16 +12,24 @@ def seed_database():
 
     try:
         # Check if users already seeded
+        # Update passwords if users already exist
         existing_admin = db.query(User).filter(User.email == "admin@fixops.local").first()
-        if existing_admin:
-            print("Database already contains seed data.")
+        existing_tech = db.query(User).filter(User.email == "tech@fixops.local").first()
+        existing_user = db.query(User).filter(User.email == "user@fixops.local").first()
+
+        if existing_admin and existing_tech and existing_user:
+            existing_admin.hashed_password = get_password_hash("admin")
+            existing_tech.hashed_password = get_password_hash("tech")
+            existing_user.hashed_password = get_password_hash("user")
+            db.commit()
+            print("Updated demo account passwords to simple defaults (admin, tech, user).")
             return
 
         print("Seeding initial users...")
         admin = User(
             email="admin@fixops.local",
             full_name="System Administrator",
-            hashed_password=get_password_hash("Admin123!"),
+            hashed_password=get_password_hash("admin"),
             role=UserRole.ADMIN,
             department="IT Infrastructure & SysAdmin",
             is_active=True
@@ -30,7 +38,7 @@ def seed_database():
         tech = User(
             email="tech@fixops.local",
             full_name="Alex Rivera (Lead Technician)",
-            hashed_password=get_password_hash("Tech123!"),
+            hashed_password=get_password_hash("tech"),
             role=UserRole.TECHNICIAN,
             department="Facilities & Maintenance",
             is_active=True
@@ -39,7 +47,7 @@ def seed_database():
         user = User(
             email="user@fixops.local",
             full_name="Joyce Ambuyo (Staff/Student)",
-            hashed_password=get_password_hash("User123!"),
+            hashed_password=get_password_hash("user"),
             role=UserRole.USER,
             department="College of Information Technology",
             is_active=True
@@ -156,10 +164,10 @@ def seed_database():
         db.add_all(logs)
         db.commit()
 
-        print("Database seeded successfully with default accounts:")
-        print("  Admin:      admin@fixops.local / Admin123!")
-        print("  Technician: tech@fixops.local  / Tech123!")
-        print("  User:       user@fixops.local  / User123!")
+        print("Database seeded successfully with simple default accounts:")
+        print("  Admin:      admin / admin  (or admin@fixops.local)")
+        print("  Technician: tech  / tech   (or tech@fixops.local)")
+        print("  User:       user  / user   (or user@fixops.local)")
     finally:
         db.close()
 

@@ -31,7 +31,7 @@ class TicketDetailView extends StatelessWidget {
                 const Text('Select New Status:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  value: newStatus,
+                  initialValue: newStatus,
                   decoration: const InputDecoration(border: OutlineInputBorder()),
                   items: statuses.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
                   onChanged: (val) => setState(() => newStatus = val!),
