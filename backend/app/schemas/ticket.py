@@ -1,7 +1,16 @@
 from datetime import datetime
-from typing import Optional, List
-from pydantic import BaseModel
+from typing import Literal, Optional, List
+from pydantic import BaseModel, field_validator
 from backend.app.schemas.user import UserResponse
+
+ITSupportCategory = Literal[
+    "HARDWARE",
+    "SOFTWARE",
+    "NETWORK",
+    "ACCOUNT_ACCESS",
+    "CYBERSECURITY",
+    "OTHER",
+]
 
 class AttachmentResponse(BaseModel):
     id: str
@@ -23,7 +32,12 @@ class TicketBase(BaseModel):
     priority: str = "MEDIUM"
 
 class TicketCreate(TicketBase):
-    pass
+    category: ITSupportCategory = "OTHER"
+
+    @field_validator("category", mode="before")
+    @classmethod
+    def normalize_category(cls, value):
+        return value.strip().upper() if isinstance(value, str) else value
 
 class TicketStatusUpdate(BaseModel):
     status: str
@@ -57,4 +71,3 @@ class TicketStatsResponse(BaseModel):
     by_category: dict[str, int]
     by_priority: dict[str, int]
     by_status: dict[str, int]
-

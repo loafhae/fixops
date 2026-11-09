@@ -42,13 +42,11 @@ class GlassContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectiveRadius = borderRadius ?? BorderRadius.circular(16);
-    final effectiveBorder = border ??
-        Border.all(
-          color: Colors.white.withAlpha(180),
-          width: 1.2,
-        );
+    final effectiveBorder =
+        border ?? Border.all(color: Colors.white.withAlpha(180), width: 1.2);
 
-    final effectiveShadow = boxShadow ??
+    final effectiveShadow =
+        boxShadow ??
         [
           BoxShadow(
             color: const Color(0xFFE00000).withAlpha(18),
@@ -71,13 +69,16 @@ class GlassContainer extends StatelessWidget {
         color: gradient == null
             ? (color ?? Colors.white).withAlpha((opacity * 255).round())
             : null,
-        gradient: gradient ??
+        gradient:
+            gradient ??
             LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
                 (color ?? Colors.white).withAlpha((opacity * 255).round()),
-                (color ?? const Color(0xFFFFECCB)).withAlpha(((opacity * 0.85) * 255).round()),
+                (color ?? const Color(0xFFFFECCB)).withAlpha(
+                  ((opacity * 0.85) * 255).round(),
+                ),
               ],
             ),
         borderRadius: effectiveRadius,
@@ -123,11 +124,7 @@ class GlassBackground extends StatelessWidget {
   final Widget child;
   final bool showOrbs;
 
-  const GlassBackground({
-    super.key,
-    required this.child,
-    this.showOrbs = true,
-  });
+  const GlassBackground({super.key, required this.child, this.showOrbs = true});
 
   @override
   Widget build(BuildContext context) {
@@ -233,4 +230,3 @@ class GlassBackground extends StatelessWidget {
     );
   }
 }
-

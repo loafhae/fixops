@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fixops_frontend/core/api_service.dart';
-import 'package:fixops_frontend/models/user_model.dart';
+import 'package:fixops_frontend/core/models/user_model.dart';
 
 class AuthProvider extends ChangeNotifier {
   UserModel? _currentUser;
@@ -39,10 +39,10 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final data = await _api.post('/auth/login', body: {
-        'email': email.trim(),
-        'password': password,
-      });
+      final data = await _api.post(
+        '/auth/login',
+        body: {'email': email.trim(), 'password': password},
+      );
 
       final token = data['access_token'];
       await _api.setAuthToken(token);
@@ -69,12 +69,15 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final data = await _api.post('/auth/register', body: {
-        'email': email.trim(),
-        'full_name': fullName.trim(),
-        'password': password,
-        'department': department.trim(),
-      });
+      final data = await _api.post(
+        '/auth/register',
+        body: {
+          'email': email.trim(),
+          'full_name': fullName.trim(),
+          'password': password,
+          'department': department.trim(),
+        },
+      );
 
       final token = data['access_token'];
       await _api.setAuthToken(token);
@@ -96,4 +99,3 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
-

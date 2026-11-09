@@ -1,17 +1,14 @@
-# fixops_frontend
+# FIXOPS Flutter User App
 
-A new Flutter project.
+This Flutter app is the cross-platform end-user client for Android, iOS, and web. Users can report technology support issues, attach photo evidence, and track their tickets.
 
-## Getting Started
+Administrators and technicians use the separate React portal in `admin-web`.
 
-This project is a starting point for a Flutter application.
+Run the app from this directory:
 
-A few resources to get you started if this is your first Flutter project:
+```powershell
+flutter run -d chrome
+flutter run -d android
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+For iOS, open the Flutter project in Xcode and run its iOS target.

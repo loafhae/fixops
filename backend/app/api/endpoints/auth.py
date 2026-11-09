@@ -68,12 +68,25 @@ def login(login_data: UserLogin, request: Request, db: Session = Depends(get_db)
             is_valid = True
 
     if not user or not is_valid:
+        log_audit_event(
+            db=db,
+            action="USER_LOGIN_FAILED",
+            details="Failed login attempt.",
+            request=request,
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username/email or password."
         )
     
     if not user.is_active:
+        log_audit_event(
+            db=db,
+            action="USER_LOGIN_BLOCKED",
+            user=user,
+            details="Login blocked for inactive account.",
+            request=request,
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="This account has been deactivated by the system administrator."
@@ -93,4 +106,3 @@ def login(login_data: UserLogin, request: Request, db: Session = Depends(get_db)
 @router.get("/me", response_model=UserResponse)
 def get_me(current_user: User = Depends(get_current_user)):
     return current_user
-

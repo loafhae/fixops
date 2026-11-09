@@ -6,6 +6,7 @@ from backend.app.db.session import get_db
 from backend.app.core.security import decode_access_token
 from backend.app.models.user import User, UserRole
 from backend.app.models.audit_log import AuditLog
+from backend.app.models.notification import Notification
 
 security_scheme = HTTPBearer(auto_error=False)
 
@@ -73,3 +74,26 @@ def log_audit_event(
     db.add(audit_entry)
     db.commit()
 
+
+def create_notifications(
+    db: Session,
+    recipients: List[User],
+    event_type: str,
+    message: str,
+    ticket_id: Optional[str] = None,
+    exclude_user_id: Optional[str] = None,
+):
+    recipient_ids = {
+        user.id
+        for user in recipients
+        if user.is_active and user.id != exclude_user_id
+    }
+    db.add_all(
+        Notification(
+            recipient_id=recipient_id,
+            ticket_id=ticket_id,
+            event_type=event_type,
+            message=message,
+        )
+        for recipient_id in recipient_ids
+    )

@@ -7,7 +7,15 @@ from fastapi.staticfiles import StaticFiles
 from backend.app.core.config import settings
 from backend.app.db.session import engine, Base
 import backend.app.models  # Ensure all SQLAlchemy models are registered
-from backend.app.api.endpoints import auth, tickets, users, audit_logs, stats
+from backend.app.api.endpoints import (
+    auth,
+    audit_logs,
+    notifications,
+    stats,
+    system,
+    tickets,
+    users,
+)
 
 # Configure logging to console and file
 logging.basicConfig(
@@ -54,11 +62,13 @@ app.include_router(tickets.router, prefix=settings.API_V1_STR)
 app.include_router(users.router, prefix=settings.API_V1_STR)
 app.include_router(audit_logs.router, prefix=settings.API_V1_STR)
 app.include_router(stats.router, prefix=settings.API_V1_STR)
+app.include_router(notifications.router, prefix=settings.API_V1_STR)
+app.include_router(system.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():
     return {
-        "system": "FIXOPS Facility Issue Reporting & Maintenance System",
+        "system": "FIXOPS IT Support and Issue Reporting System",
         "status": "online",
         "docs_url": f"{settings.API_V1_STR}/docs",
         "course": "BSIT 4B - System Administration"
@@ -67,4 +77,3 @@ def root():
 @app.get("/api/health")
 def health_check():
     return {"status": "healthy"}
-

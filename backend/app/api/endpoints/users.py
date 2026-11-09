@@ -12,7 +12,7 @@ router = APIRouter(prefix="/users", tags=["User & Access Management"])
 def list_users(
     role_filter: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.TECHNICIAN]))
+    current_user: User = Depends(require_roles([UserRole.ADMIN]))
 ):
     query = db.query(User)
     if role_filter:
@@ -52,4 +52,3 @@ def update_user_role_or_status(
     )
 
     return user
-

@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:fixops_frontend/core/api_service.dart';
-import 'package:fixops_frontend/models/ticket_model.dart';
+import 'package:fixops_frontend/core/models/ticket_model.dart';
 
 class TicketProvider extends ChangeNotifier {
   List<TicketModel> _tickets = [];
@@ -100,14 +100,17 @@ class TicketProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final data = await _api.post('/tickets/', body: {
-        'title': title,
-        'description': description,
-        'building': building,
-        'floor_room': floorRoom,
-        'category': category,
-        'priority': priority,
-      });
+      final data = await _api.post(
+        '/tickets/',
+        body: {
+          'title': title,
+          'description': description,
+          'building': building,
+          'floor_room': floorRoom,
+          'category': category,
+          'priority': priority,
+        },
+      );
 
       final newTicket = TicketModel.fromJson(data);
 
@@ -130,35 +133,4 @@ class TicketProvider extends ChangeNotifier {
       return null;
     }
   }
-
-  Future<bool> updateStatus(String ticketId, String status, {String? notes}) async {
-    try {
-      final body = <String, dynamic>{'status': status};
-      if (notes != null) {
-        body['resolution_notes'] = notes;
-      }
-      await _api.patch('/tickets/$ticketId/status', body: body);
-      await fetchTickets();
-      return true;
-    } catch (e) {
-      _errorMessage = e.toString().replaceAll('Exception: ', '');
-      notifyListeners();
-      return false;
-    }
-  }
-
-  Future<bool> claimTicket(String ticketId, String technicianId) async {
-    try {
-      await _api.patch('/tickets/$ticketId/assign', body: {
-        'technician_id': technicianId,
-      });
-      await fetchTickets();
-      return true;
-    } catch (e) {
-      _errorMessage = e.toString().replaceAll('Exception: ', '');
-      notifyListeners();
-      return false;
-    }
-  }
 }
-

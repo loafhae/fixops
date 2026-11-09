@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fixops_frontend/core/constants.dart';
-import 'package:fixops_frontend/models/user_model.dart';
+import 'package:fixops_frontend/core/models/user_model.dart';
 
 class AttachmentModel {
   final String id;
@@ -28,7 +28,9 @@ class AttachmentModel {
       fileName: json['file_name'] ?? '',
       fileType: json['file_type'] ?? 'IMAGE_EVIDENCE',
       fileSizeBytes: json['file_size_bytes'] ?? 0,
-      uploadedAt: json['uploaded_at'] != null ? DateTime.tryParse(json['uploaded_at']) : null,
+      uploadedAt: json['uploaded_at'] != null
+          ? DateTime.tryParse(json['uploaded_at'])
+          : null,
     );
   }
 }
@@ -118,16 +120,26 @@ class TicketModel {
       reportedById: json['reported_by_id'] ?? '',
       assignedToId: json['assigned_to_id'],
       resolutionNotes: json['resolution_notes'],
-      resolvedAt: json['resolved_at'] != null ? DateTime.tryParse(json['resolved_at']) : null,
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : DateTime.now(),
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : DateTime.now(),
-      reporter: json['reporter'] != null ? UserModel.fromJson(json['reporter']) : null,
-      technician: json['technician'] != null ? UserModel.fromJson(json['technician']) : null,
-      attachments: (json['attachments'] as List<dynamic>?)
+      resolvedAt: json['resolved_at'] != null
+          ? DateTime.tryParse(json['resolved_at'])
+          : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : DateTime.now(),
+      reporter: json['reporter'] != null
+          ? UserModel.fromJson(json['reporter'])
+          : null,
+      technician: json['technician'] != null
+          ? UserModel.fromJson(json['technician'])
+          : null,
+      attachments:
+          (json['attachments'] as List<dynamic>?)
               ?.map((e) => AttachmentModel.fromJson(e))
               .toList() ??
           [],
     );
   }
 }
-

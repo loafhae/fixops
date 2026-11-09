@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:fixops_frontend/core/constants.dart';
-import 'package:fixops_frontend/providers/ticket_provider.dart';
-import 'package:fixops_frontend/widgets/glass_container.dart';
+import 'package:fixops_frontend/shared/widgets/glass_container.dart';
+import 'package:fixops_frontend/user/providers/ticket_provider.dart';
 
 class CreateTicketView extends StatefulWidget {
   const CreateTicketView({super.key});
@@ -21,19 +21,18 @@ class _CreateTicketViewState extends State<CreateTicketView> {
   final _buildingController = TextEditingController();
   final _roomController = TextEditingController();
 
-  String _selectedCategory = 'ELECTRICAL';
+  String _selectedCategory = 'HARDWARE';
   String _selectedPriority = 'MEDIUM';
 
   Uint8List? _photoBytes;
   String? _photoFilename;
 
   final List<String> _categories = [
-    'ELECTRICAL',
-    'PLUMBING',
-    'STRUCTURAL',
-    'HVAC',
-    'FURNITURE',
-    'SAFETY_HAZARD',
+    'HARDWARE',
+    'SOFTWARE',
+    'NETWORK',
+    'ACCOUNT_ACCESS',
+    'CYBERSECURITY',
     'OTHER',
   ];
 
@@ -49,9 +48,7 @@ class _CreateTicketViewState extends State<CreateTicketView> {
   }
 
   Future<void> _pickPhoto() async {
-    final files = await FilePicker.pickFiles(
-      type: FileType.image,
-    );
+    final files = await FilePicker.pickFiles(type: FileType.image);
 
     if (files.isNotEmpty) {
       final file = files.first;
@@ -70,7 +67,7 @@ class _CreateTicketViewState extends State<CreateTicketView> {
     return Scaffold(
       extendBodyBehindAppBar: false,
       appBar: AppBar(
-        title: const Text('Report Facility Issue'),
+        title: const Text('Report Technology Issue'),
         backgroundColor: Colors.transparent,
         foregroundColor: AppColors.textMain,
         elevation: 0,
@@ -80,7 +77,12 @@ class _CreateTicketViewState extends State<CreateTicketView> {
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white.withAlpha(160),
-                border: Border(bottom: BorderSide(color: Colors.white.withAlpha(200), width: 1)),
+                border: Border(
+                  bottom: BorderSide(
+                    color: Colors.white.withAlpha(200),
+                    width: 1,
+                  ),
+                ),
               ),
             ),
           ),
@@ -96,7 +98,10 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                 blur: 24,
                 opacity: 0.82,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.white.withAlpha(220), width: 1.5),
+                border: Border.all(
+                  color: Colors.white.withAlpha(220),
+                  width: 1.5,
+                ),
                 padding: const EdgeInsets.all(32),
                 child: Form(
                   key: _formKey,
@@ -109,11 +114,18 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [AppColors.primary, AppColors.secondary],
+                                colors: [
+                                  AppColors.primary,
+                                  AppColors.secondary,
+                                ],
                               ),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(Icons.add_alert_rounded, color: Colors.white, size: 24),
+                            child: const Icon(
+                              Icons.add_alert_rounded,
+                              color: Colors.white,
+                              size: 24,
+                            ),
                           ),
                           const SizedBox(width: 14),
                           const Expanded(
@@ -122,12 +134,19 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                               children: [
                                 Text(
                                   'Submit Maintenance Request',
-                                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary),
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primary,
+                                  ),
                                 ),
                                 SizedBox(height: 2),
                                 Text(
                                   'Provide location and attach evidence for quick dispatch.',
-                                  style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.textMuted,
+                                  ),
                                 ),
                               ],
                             ),
@@ -143,16 +162,27 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                           decoration: BoxDecoration(
                             color: AppColors.primary.withAlpha(20),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.primary.withAlpha(120), width: 1.2),
+                            border: Border.all(
+                              color: AppColors.primary.withAlpha(120),
+                              width: 1.2,
+                            ),
                           ),
                           child: const Row(
                             children: [
-                              Icon(Icons.warning_amber_rounded, color: AppColors.primary, size: 22),
+                              Icon(
+                                Icons.warning_amber_rounded,
+                                color: AppColors.primary,
+                                size: 22,
+                              ),
                               SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  'CRITICAL: This report triggers emergency triage for immediate electrical, structural, or life-safety hazards.',
-                                  style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold),
+                                  'CRITICAL: Use this priority for major outages or urgent technology and security incidents.',
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ],
@@ -163,10 +193,16 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                         controller: _titleController,
                         decoration: const InputDecoration(
                           labelText: 'Issue Summary / Title *',
-                          hintText: 'e.g. Broken AC unit, live wire exposed, pipe leaking',
-                          prefixIcon: Icon(Icons.title_rounded, color: AppColors.primary),
+                          hintText:
+                              'e.g. Wi-Fi outage, broken computer, account access issue',
+                          prefixIcon: Icon(
+                            Icons.title_rounded,
+                            color: AppColors.primary,
+                          ),
                         ),
-                        validator: (val) => val == null || val.trim().isEmpty ? 'Please enter a title' : null,
+                        validator: (val) => val == null || val.trim().isEmpty
+                            ? 'Please enter a title'
+                            : null,
                       ),
                       const SizedBox(height: 16),
 
@@ -177,10 +213,21 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                               initialValue: _selectedCategory,
                               decoration: const InputDecoration(
                                 labelText: 'Category *',
-                                prefixIcon: Icon(Icons.category_outlined, color: AppColors.primary),
+                                prefixIcon: Icon(
+                                  Icons.category_outlined,
+                                  color: AppColors.primary,
+                                ),
                               ),
-                              items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                              onChanged: (val) => setState(() => _selectedCategory = val!),
+                              items: _categories
+                                  .map(
+                                    (c) => DropdownMenuItem(
+                                      value: c,
+                                      child: Text(c),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (val) =>
+                                  setState(() => _selectedCategory = val!),
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -189,10 +236,21 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                               initialValue: _selectedPriority,
                               decoration: const InputDecoration(
                                 labelText: 'Severity / Priority *',
-                                prefixIcon: Icon(Icons.flag_outlined, color: AppColors.primary),
+                                prefixIcon: Icon(
+                                  Icons.flag_outlined,
+                                  color: AppColors.primary,
+                                ),
                               ),
-                              items: _priorities.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
-                              onChanged: (val) => setState(() => _selectedPriority = val!),
+                              items: _priorities
+                                  .map(
+                                    (p) => DropdownMenuItem(
+                                      value: p,
+                                      child: Text(p),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (val) =>
+                                  setState(() => _selectedPriority = val!),
                             ),
                           ),
                         ],
@@ -207,9 +265,15 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                               decoration: const InputDecoration(
                                 labelText: 'Building / Wing *',
                                 hintText: 'e.g. IT Building',
-                                prefixIcon: Icon(Icons.business_rounded, color: AppColors.primary),
+                                prefixIcon: Icon(
+                                  Icons.business_rounded,
+                                  color: AppColors.primary,
+                                ),
                               ),
-                              validator: (val) => val == null || val.trim().isEmpty ? 'Building required' : null,
+                              validator: (val) =>
+                                  val == null || val.trim().isEmpty
+                                  ? 'Building required'
+                                  : null,
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -219,9 +283,15 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                               decoration: const InputDecoration(
                                 labelText: 'Floor / Room *',
                                 hintText: 'e.g. 3rd Floor, Lab 304',
-                                prefixIcon: Icon(Icons.meeting_room_outlined, color: AppColors.primary),
+                                prefixIcon: Icon(
+                                  Icons.meeting_room_outlined,
+                                  color: AppColors.primary,
+                                ),
                               ),
-                              validator: (val) => val == null || val.trim().isEmpty ? 'Room required' : null,
+                              validator: (val) =>
+                                  val == null || val.trim().isEmpty
+                                  ? 'Room required'
+                                  : null,
                             ),
                           ),
                         ],
@@ -233,9 +303,12 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                         maxLines: 4,
                         decoration: const InputDecoration(
                           labelText: 'Detailed Description of the Issue *',
-                          hintText: 'Describe what you observe, how severe it is, and any safety precautions needed...',
+                          hintText:
+                              'Describe what you observe, how severe it is, and any safety precautions needed...',
                         ),
-                        validator: (val) => val == null || val.trim().isEmpty ? 'Please describe the issue' : null,
+                        validator: (val) => val == null || val.trim().isEmpty
+                            ? 'Please describe the issue'
+                            : null,
                       ),
                       const SizedBox(height: 20),
 
@@ -245,18 +318,29 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                         decoration: BoxDecoration(
                           color: AppColors.cream.withAlpha(90),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.secondary.withAlpha(90), width: 1),
+                          border: Border.all(
+                            color: AppColors.secondary.withAlpha(90),
+                            width: 1,
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Row(
                               children: [
-                                Icon(Icons.camera_alt_outlined, size: 18, color: AppColors.primary),
+                                Icon(
+                                  Icons.camera_alt_outlined,
+                                  size: 18,
+                                  color: AppColors.primary,
+                                ),
                                 SizedBox(width: 8),
                                 Text(
                                   'Photo Evidence (Optional but Recommended)',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textMain),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: AppColors.textMain,
+                                  ),
                                 ),
                               ],
                             ),
@@ -279,7 +363,11 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                                     child: CircleAvatar(
                                       backgroundColor: Colors.black54,
                                       child: IconButton(
-                                        icon: const Icon(Icons.close, color: Colors.white, size: 18),
+                                        icon: const Icon(
+                                          Icons.close,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
                                         onPressed: () => setState(() {
                                           _photoBytes = null;
                                           _photoFilename = null;
@@ -290,16 +378,35 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                                 ],
                               ),
                               const SizedBox(height: 8),
-                              Text('File: $_photoFilename', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                              Text(
+                                'File: $_photoFilename',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textMuted,
+                                ),
+                              ),
                             ] else
                               OutlinedButton.icon(
                                 style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                                  side: BorderSide(color: AppColors.secondary.withAlpha(120)),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                    horizontal: 16,
+                                  ),
+                                  side: BorderSide(
+                                    color: AppColors.secondary.withAlpha(120),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                 ),
-                                icon: const Icon(Icons.add_photo_alternate_outlined, color: AppColors.primary),
-                                label: const Text('Attach Incident Photo from Device', style: TextStyle(color: AppColors.textMain)),
+                                icon: const Icon(
+                                  Icons.add_photo_alternate_outlined,
+                                  color: AppColors.primary,
+                                ),
+                                label: const Text(
+                                  'Attach Incident Photo from Device',
+                                  style: TextStyle(color: AppColors.textMain),
+                                ),
                                 onPressed: _pickPhoto,
                               ),
                           ],
@@ -327,40 +434,57 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent,
                             padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
                           onPressed: ticketProvider.isLoading
                               ? null
                               : () async {
-                                  if (!_formKey.currentState!.validate()) return;
+                                  if (!_formKey.currentState!.validate()) {
+                                    return;
+                                  }
 
-                                  final messenger = ScaffoldMessenger.of(context);
+                                  final messenger = ScaffoldMessenger.of(
+                                    context,
+                                  );
                                   final navigator = Navigator.of(context);
 
-                                  final newTicket = await ticketProvider.createTicket(
-                                    title: _titleController.text.trim(),
-                                    description: _descController.text.trim(),
-                                    building: _buildingController.text.trim(),
-                                    floorRoom: _roomController.text.trim(),
-                                    category: _selectedCategory,
-                                    priority: _selectedPriority,
-                                    photoBytes: _photoBytes,
-                                    photoFilename: _photoFilename,
-                                  );
+                                  final newTicket = await ticketProvider
+                                      .createTicket(
+                                        title: _titleController.text.trim(),
+                                        description: _descController.text
+                                            .trim(),
+                                        building: _buildingController.text
+                                            .trim(),
+                                        floorRoom: _roomController.text.trim(),
+                                        category: _selectedCategory,
+                                        priority: _selectedPriority,
+                                        photoBytes: _photoBytes,
+                                        photoFilename: _photoFilename,
+                                      );
 
                                   if (newTicket != null && mounted) {
                                     navigator.pop();
                                     messenger.showSnackBar(
                                       const SnackBar(
                                         backgroundColor: AppColors.accentLime,
-                                        content: Text('Facility ticket reported successfully!', style: TextStyle(color: AppColors.textMain)),
+                                        content: Text(
+                                          'Facility ticket reported successfully!',
+                                          style: TextStyle(
+                                            color: AppColors.textMain,
+                                          ),
+                                        ),
                                       ),
                                     );
                                   } else if (mounted) {
                                     messenger.showSnackBar(
                                       SnackBar(
                                         backgroundColor: AppColors.primary,
-                                        content: Text(ticketProvider.errorMessage ?? 'Failed to submit report'),
+                                        content: Text(
+                                          ticketProvider.errorMessage ??
+                                              'Failed to submit report',
+                                        ),
                                       ),
                                     );
                                   }
@@ -369,7 +493,10 @@ class _CreateTicketViewState extends State<CreateTicketView> {
                               ? const SizedBox(
                                   height: 20,
                                   width: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
                                 )
                               : const Text(
                                   'Submit Ticket & Alert Facilities',

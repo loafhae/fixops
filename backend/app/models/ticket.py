@@ -5,12 +5,11 @@ from sqlalchemy.orm import relationship
 from backend.app.db.session import Base
 
 class TicketCategory:
-    ELECTRICAL = "ELECTRICAL"
-    PLUMBING = "PLUMBING"
-    STRUCTURAL = "STRUCTURAL"
-    HVAC = "HVAC"
-    FURNITURE = "FURNITURE"
-    SAFETY_HAZARD = "SAFETY_HAZARD"
+    HARDWARE = "HARDWARE"
+    SOFTWARE = "SOFTWARE"
+    NETWORK = "NETWORK"
+    ACCOUNT_ACCESS = "ACCOUNT_ACCESS"
+    CYBERSECURITY = "CYBERSECURITY"
     OTHER = "OTHER"
 
 class TicketPriority:
@@ -52,4 +51,3 @@ class Ticket(Base):
     technician = relationship("User", foreign_keys=[assigned_to_id], back_populates="assigned_tickets")
     attachments = relationship("Attachment", back_populates="ticket", cascade="all, delete-orphan")
     audit_logs = relationship("AuditLog", back_populates="ticket")
-

@@ -19,7 +19,12 @@ from backend.app.schemas.ticket import (
     TicketAssign,
     AttachmentResponse
 )
-from backend.app.api.deps import get_current_user, require_roles, log_audit_event
+from backend.app.api.deps import (
+    create_notifications,
+    get_current_user,
+    log_audit_event,
+    require_roles,
+)
 
 router = APIRouter(prefix="/tickets", tags=["Tickets"])
 
@@ -85,6 +90,21 @@ def create_ticket(
     db.commit()
     db.refresh(new_ticket)
 
+    staff = (
+        db.query(User)
+        .filter(
+            User.is_active.is_(True),
+            User.role.in_([UserRole.ADMIN, UserRole.TECHNICIAN]),
+        )
+        .all()
+    )
+    create_notifications(
+        db=db,
+        recipients=[*staff, current_user],
+        event_type="TICKET_SUBMITTED",
+        message=f"Ticket #{new_ticket.ticket_number} was submitted.",
+        ticket_id=new_ticket.id,
+    )
     log_audit_event(
         db=db,
         action="TICKET_CREATED",
@@ -123,9 +143,44 @@ def update_ticket_status(
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found.")
+
+    if (
+        current_user.role == UserRole.TECHNICIAN
+        and ticket.assigned_to_id != current_user.id
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="Technicians can update only work orders assigned to them.",
+        )
+
+    allowed_statuses = {
+        TicketStatus.SUBMITTED,
+        TicketStatus.UNDER_REVIEW,
+        TicketStatus.IN_PROGRESS,
+        TicketStatus.RESOLVED,
+        TicketStatus.CANCELLED,
+    }
+    new_status = status_update.status.upper()
+    if new_status not in allowed_statuses:
+        raise HTTPException(status_code=400, detail="Invalid ticket status.")
+    if current_user.role == UserRole.TECHNICIAN:
+        if new_status not in {TicketStatus.IN_PROGRESS, TicketStatus.RESOLVED}:
+            raise HTTPException(
+                status_code=403,
+                detail="Technicians may start or resolve their assigned work orders.",
+            )
+        if (
+            new_status == TicketStatus.RESOLVED
+            and ticket.status != TicketStatus.IN_PROGRESS
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail="Start the work order before resolving it.",
+            )
     
     prev_status = ticket.status
-    ticket.status = status_update.status.upper()
+    prev_notes = ticket.resolution_notes
+    ticket.status = new_status
     
     if status_update.resolution_notes:
         ticket.resolution_notes = status_update.resolution_notes
@@ -138,14 +193,55 @@ def update_ticket_status(
     db.commit()
     db.refresh(ticket)
 
-    log_audit_event(
-        db=db,
-        action="TICKET_STATUS_UPDATED",
-        user=current_user,
-        target_ticket_id=ticket.id,
-        details=f"Ticket #{ticket.ticket_number} status changed from {prev_status} to {ticket.status}",
-        request=request
-    )
+    status_changed = prev_status != ticket.status
+    notes_changed = prev_notes != ticket.resolution_notes
+    if status_changed or notes_changed:
+        if status_changed and ticket.status == TicketStatus.RESOLVED:
+            action = "TICKET_RESOLVED"
+            event_type = "TICKET_RESOLVED"
+            message = f"Ticket #{ticket.ticket_number} was marked as resolved."
+        else:
+            action = "TICKET_STATUS_UPDATED" if status_changed else "TICKET_UPDATED"
+            event_type = "TICKET_UPDATED"
+            message = (
+                f"Ticket #{ticket.ticket_number} status changed to "
+                f"{ticket.status.replace('_', ' ').title()}."
+                if status_changed
+                else f"Work notes were updated for ticket #{ticket.ticket_number}."
+            )
+        recipients = (
+            db.query(User)
+            .filter(
+                User.is_active.is_(True),
+                (
+                    (User.id == ticket.reported_by_id)
+                    | (User.id == ticket.assigned_to_id)
+                    | (User.role == UserRole.ADMIN)
+                ),
+            )
+            .all()
+        )
+        create_notifications(
+            db=db,
+            recipients=recipients,
+            event_type=event_type,
+            message=message,
+            ticket_id=ticket.id,
+            exclude_user_id=current_user.id,
+        )
+        log_audit_event(
+            db=db,
+            action=action,
+            user=current_user,
+            target_ticket_id=ticket.id,
+            details=(
+                f"Ticket #{ticket.ticket_number} status changed from "
+                f"{prev_status} to {ticket.status}"
+                if status_changed
+                else f"Work notes updated for ticket #{ticket.ticket_number}"
+            ),
+            request=request,
+        )
 
     return ticket
 
@@ -164,7 +260,25 @@ def assign_technician(
     tech = db.query(User).filter(User.id == assign_in.technician_id).first()
     if not tech or tech.role not in [UserRole.TECHNICIAN, UserRole.ADMIN]:
         raise HTTPException(status_code=400, detail="Assigned user must be a technician or admin.")
-    
+    if ticket.status in {TicketStatus.RESOLVED, TicketStatus.CANCELLED}:
+        raise HTTPException(
+            status_code=400,
+            detail="Closed work orders cannot be assigned.",
+        )
+
+    if current_user.role == UserRole.TECHNICIAN:
+        if assign_in.technician_id != current_user.id:
+            raise HTTPException(
+                status_code=403,
+                detail="Technicians may claim work orders only for themselves.",
+            )
+        if ticket.assigned_to_id not in (None, current_user.id):
+            raise HTTPException(
+                status_code=403,
+                detail="This work order is already assigned to another technician.",
+            )
+
+    previous_assignee_id = ticket.assigned_to_id
     ticket.assigned_to_id = tech.id
     if ticket.status == TicketStatus.SUBMITTED:
         ticket.status = TicketStatus.UNDER_REVIEW
@@ -172,6 +286,26 @@ def assign_technician(
     db.commit()
     db.refresh(ticket)
 
+    if previous_assignee_id != tech.id:
+        recipients = (
+            db.query(User)
+            .filter(
+                User.is_active.is_(True),
+                (
+                    (User.id == tech.id)
+                    | (User.id == ticket.reported_by_id)
+                    | (User.role == UserRole.ADMIN)
+                ),
+            )
+            .all()
+        )
+        create_notifications(
+            db=db,
+            recipients=recipients,
+            event_type="TICKET_ASSIGNED",
+            message=f"Ticket #{ticket.ticket_number} was assigned to {tech.full_name}.",
+            ticket_id=ticket.id,
+        )
     log_audit_event(
         db=db,
         action="TICKET_ASSIGNED",
@@ -222,6 +356,26 @@ async def upload_attachment(
     db.commit()
     db.refresh(attachment)
 
+    recipients = (
+        db.query(User)
+        .filter(
+            User.is_active.is_(True),
+            (
+                (User.id == ticket.reported_by_id)
+                | (User.id == ticket.assigned_to_id)
+                | (User.role == UserRole.ADMIN)
+            ),
+        )
+        .all()
+    )
+    create_notifications(
+        db=db,
+        recipients=recipients,
+        event_type="TICKET_UPDATED",
+        message=f"New attachment added to ticket #{ticket.ticket_number}.",
+        ticket_id=ticket.id,
+        exclude_user_id=current_user.id,
+    )
     log_audit_event(
         db=db,
         action="ATTACHMENT_UPLOADED",
@@ -232,4 +386,3 @@ async def upload_attachment(
     )
 
     return attachment
-

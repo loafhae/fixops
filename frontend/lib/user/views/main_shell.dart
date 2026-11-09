@@ -2,12 +2,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fixops_frontend/core/constants.dart';
-import 'package:fixops_frontend/providers/auth_provider.dart';
-import 'package:fixops_frontend/views/dashboard_view.dart';
-import 'package:fixops_frontend/views/ticket_list_view.dart';
-import 'package:fixops_frontend/views/audit_logs_view.dart';
-import 'package:fixops_frontend/views/user_management_view.dart';
-import 'package:fixops_frontend/widgets/glass_container.dart';
+import 'package:fixops_frontend/core/models/user_model.dart';
+import 'package:fixops_frontend/shared/widgets/glass_container.dart';
+import 'package:fixops_frontend/user/providers/auth_provider.dart';
+import 'package:fixops_frontend/user/views/ticket_list_view.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -25,7 +23,6 @@ class _MainShellState extends State<MainShell> {
     final user = auth.currentUser;
     final isDesktopOrWeb = MediaQuery.of(context).size.width >= 900;
 
-    // Build navigation items based on role
     final List<_NavItem> navItems = [
       _NavItem(
         title: 'Tickets',
@@ -33,27 +30,13 @@ class _MainShellState extends State<MainShell> {
         selectedIcon: Icons.confirmation_number_rounded,
         view: const TicketListView(),
       ),
-      if (user != null && !user.isStaffOrStudent)
+      if (!isDesktopOrWeb)
         _NavItem(
-          title: 'Overview',
-          icon: Icons.dashboard_outlined,
-          selectedIcon: Icons.dashboard_rounded,
-          view: const DashboardView(),
+          title: 'Account',
+          icon: Icons.person_outline_rounded,
+          selectedIcon: Icons.person_rounded,
+          view: _AccountView(user: user, onSignOut: auth.logout),
         ),
-      if (user != null && user.isAdmin) ...[
-        _NavItem(
-          title: 'Audit Trail',
-          icon: Icons.history_toggle_off_rounded,
-          selectedIcon: Icons.history_rounded,
-          view: const AuditLogsView(),
-        ),
-        _NavItem(
-          title: 'Users & RBAC',
-          icon: Icons.manage_accounts_outlined,
-          selectedIcon: Icons.manage_accounts_rounded,
-          view: const UserManagementView(),
-        ),
-      ],
     ];
 
     if (_selectedIndex >= navItems.length) {
@@ -84,7 +67,10 @@ class _MainShellState extends State<MainShell> {
                       children: [
                         // App Brand Header
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 28,
+                          ),
                           child: Row(
                             children: [
                               Container(
@@ -94,7 +80,10 @@ class _MainShellState extends State<MainShell> {
                                   gradient: const LinearGradient(
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
-                                    colors: [AppColors.primary, AppColors.secondary],
+                                    colors: [
+                                      AppColors.primary,
+                                      AppColors.secondary,
+                                    ],
                                   ),
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
@@ -105,7 +94,11 @@ class _MainShellState extends State<MainShell> {
                                     ),
                                   ],
                                 ),
-                                child: const Icon(Icons.build_rounded, color: Colors.white, size: 22),
+                                child: const Icon(
+                                  Icons.build_rounded,
+                                  color: Colors.white,
+                                  size: 22,
+                                ),
                               ),
                               const SizedBox(width: 14),
                               Column(
@@ -177,22 +170,37 @@ class _MainShellState extends State<MainShell> {
                                         )
                                       : null,
                                 ),
-                                child: ListTile(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                  leading: Icon(
-                                    isSelected ? item.selectedIcon : item.icon,
-                                    color: isSelected ? Colors.white : Colors.white70,
-                                    size: 22,
-                                  ),
-                                  title: Text(
-                                    item.title,
-                                    style: TextStyle(
-                                      color: isSelected ? Colors.white : Colors.white70,
-                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                      fontSize: 14,
+                                child: Material(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: ListTile(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
+                                    leading: Icon(
+                                      isSelected
+                                          ? item.selectedIcon
+                                          : item.icon,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : Colors.white70,
+                                      size: 22,
+                                    ),
+                                    title: Text(
+                                      item.title,
+                                      style: TextStyle(
+                                        color: isSelected
+                                            ? Colors.white
+                                            : Colors.white70,
+                                        fontWeight: isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.w500,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    onTap: () =>
+                                        setState(() => _selectedIndex = idx),
                                   ),
-                                  onTap: () => setState(() => _selectedIndex = idx),
                                 ),
                               );
                             },
@@ -206,7 +214,10 @@ class _MainShellState extends State<MainShell> {
                           decoration: BoxDecoration(
                             color: Colors.white.withAlpha(22),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white.withAlpha(35), width: 1),
+                            border: Border.all(
+                              color: Colors.white.withAlpha(35),
+                              width: 1,
+                            ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,7 +228,10 @@ class _MainShellState extends State<MainShell> {
                                     radius: 18,
                                     backgroundColor: AppColors.primary,
                                     child: Text(
-                                      (user?.fullName.isNotEmpty == true ? user!.fullName[0] : 'U').toUpperCase(),
+                                      (user?.fullName.isNotEmpty == true
+                                              ? user!.fullName[0]
+                                              : 'U')
+                                          .toUpperCase(),
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -228,7 +242,8 @@ class _MainShellState extends State<MainShell> {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           user?.fullName ?? 'User',
@@ -242,11 +257,21 @@ class _MainShellState extends State<MainShell> {
                                         ),
                                         const SizedBox(height: 2),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
                                           decoration: BoxDecoration(
-                                            color: AppColors.accentLime.withAlpha(40),
-                                            borderRadius: BorderRadius.circular(6),
-                                            border: Border.all(color: AppColors.accentLime.withAlpha(100), width: 0.8),
+                                            color: AppColors.accentLime
+                                                .withAlpha(40),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
+                                            border: Border.all(
+                                              color: AppColors.accentLime
+                                                  .withAlpha(100),
+                                              width: 0.8,
+                                            ),
                                           ),
                                           child: Text(
                                             user?.role ?? 'Role',
@@ -269,12 +294,25 @@ class _MainShellState extends State<MainShell> {
                                 child: OutlinedButton.icon(
                                   style: OutlinedButton.styleFrom(
                                     foregroundColor: Colors.white,
-                                    side: BorderSide(color: Colors.white.withAlpha(50)),
-                                    padding: const EdgeInsets.symmetric(vertical: 10),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                    side: BorderSide(
+                                      color: Colors.white.withAlpha(50),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 10,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
                                   ),
-                                  icon: const Icon(Icons.logout_rounded, size: 16, color: AppColors.secondary),
-                                  label: const Text('Sign Out', style: TextStyle(fontSize: 12)),
+                                  icon: const Icon(
+                                    Icons.logout_rounded,
+                                    size: 16,
+                                    color: AppColors.secondary,
+                                  ),
+                                  label: const Text(
+                                    'Sign Out',
+                                    style: TextStyle(fontSize: 12),
+                                  ),
                                   onPressed: () => auth.logout(),
                                 ),
                               ),
@@ -288,9 +326,7 @@ class _MainShellState extends State<MainShell> {
               ),
 
               // Main Content Area
-              Expanded(
-                child: navItems[_selectedIndex].view,
-              ),
+              Expanded(child: navItems[_selectedIndex].view),
             ],
           ),
         ),
@@ -299,9 +335,7 @@ class _MainShellState extends State<MainShell> {
       // Mobile View: Floating Frosted Glass Bottom Navigation Bar
       return Scaffold(
         extendBody: true,
-        body: GlassBackground(
-          child: navItems[_selectedIndex].view,
-        ),
+        body: GlassBackground(child: navItems[_selectedIndex].view),
         bottomNavigationBar: Container(
           margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           decoration: BoxDecoration(
@@ -322,7 +356,10 @@ class _MainShellState extends State<MainShell> {
                 decoration: BoxDecoration(
                   color: Colors.white.withAlpha(210),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.white.withAlpha(220), width: 1.5),
+                  border: Border.all(
+                    color: Colors.white.withAlpha(220),
+                    width: 1.5,
+                  ),
                 ),
                 child: BottomNavigationBar(
                   elevation: 0,
@@ -330,7 +367,10 @@ class _MainShellState extends State<MainShell> {
                   currentIndex: _selectedIndex,
                   selectedItemColor: AppColors.primary,
                   unselectedItemColor: AppColors.textMuted,
-                  selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                  selectedLabelStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
                   unselectedLabelStyle: const TextStyle(fontSize: 11),
                   type: BottomNavigationBarType.fixed,
                   onTap: (idx) => setState(() => _selectedIndex = idx),
@@ -351,11 +391,107 @@ class _MainShellState extends State<MainShell> {
   }
 }
 
+class _AccountView extends StatelessWidget {
+  const _AccountView({required this.user, required this.onSignOut});
+
+  final UserModel? user;
+  final VoidCallback onSignOut;
+
+  @override
+  Widget build(BuildContext context) {
+    final fullName = user?.fullName.trim();
+    final displayName = fullName == null || fullName.isEmpty ? 'User' : fullName;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Account'),
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppColors.textMain,
+        elevation: 0,
+      ),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      CircleAvatar(
+                        radius: 34,
+                        backgroundColor: AppColors.primary,
+                        child: Text(
+                          displayName[0].toUpperCase(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        displayName,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: AppColors.textMain,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        user?.role ?? 'User',
+                        style: const TextStyle(color: AppColors.textMuted),
+                      ),
+                      const Divider(height: 28),
+                      ListTile(
+                        leading: const Icon(Icons.email_outlined),
+                        title: const Text('Email'),
+                        subtitle: Text(user?.email ?? '—'),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.business_outlined),
+                        title: const Text('Department'),
+                        subtitle: Text(user?.department ?? '—'),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: onSignOut,
+                icon: const Icon(Icons.logout_rounded),
+                label: const Text('Sign Out'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _NavItem {
   final String title;
   final IconData icon;
   final IconData selectedIcon;
   final Widget view;
 
-  _NavItem({required this.title, required this.icon, required this.selectedIcon, required this.view});
+  _NavItem({
+    required this.title,
+    required this.icon,
+    required this.selectedIcon,
+    required this.view,
+  });
 }

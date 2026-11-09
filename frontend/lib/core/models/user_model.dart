@@ -29,7 +29,9 @@ class UserModel {
       role: json['role'] ?? 'USER',
       department: json['department'] ?? 'General',
       isActive: json['is_active'] ?? true,
-      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at']) : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'])
+          : null,
     );
   }
 
@@ -44,4 +46,3 @@ class UserModel {
     };
   }
 }
-

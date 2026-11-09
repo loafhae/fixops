@@ -12,7 +12,7 @@
 
 ## 🌟 Overview
 
-**FIXOPS** is a centralized facility issue reporting and maintenance management platform bridging practical software engineering with real-world system administration. It replaces informal, scattered reporting channels (verbal talks, lost group chats, paper forms) with a structured digital intake workflow, real-time ticket triage, photo evidence tracking, and an immutable activity audit trail.
+**FIXOPS** is a centralized IT support and technology issue reporting platform bridging practical software engineering with real-world system administration. It replaces informal, scattered reporting channels (verbal talks, lost group chats, paper forms) with a structured digital intake workflow, real-time ticket triage, photo evidence tracking, and an immutable activity audit trail.
 
 ---
 
@@ -27,11 +27,10 @@
   * **Database Layer:** SQLite (local zero-configuration) with SQLAlchemy ORM, easily switchable to PostgreSQL or MySQL.
   * **Interactive API Documentation:** Auto-generated Swagger UI at `http://127.0.0.1:8000/api/v1/docs`.
 
-* **Frontend Client (Flutter Multiplatform):**
-  * **Cross-Platform Delivery:** Runs natively on **Mobile** (Android/iOS) and **Web** (Chrome, Edge, Desktop).
-  * **Adaptive Responsive UI:**
-    * **Web / Desktop ($\ge 900$px):** Full-screen dashboard with navigation sidebar, analytics cards, triage tables, audit trail viewer, and RBAC user management.
-    * **Mobile Phone ($< 900$px):** Clean single-handed reporting interface with bottom navigation and quick camera/photo attachments.
+* **Frontend Clients:**
+  * **React Operations Portal:** Role-separated web app. **Technicians** see their assigned workload, claim support tickets, and update status and resolution notes. **Administrators** get system-wide analytics, user/RBAC controls, activity audit, and FastAPI service logs.
+  * **Flutter Cross-Platform User App:** Android, iOS, and web app for end users to report technology issues with photo evidence, prioritize tickets, track progress, and receive in-app notifications.
+  * **Automated In-App Notifications:** Persisted alerts are created for ticket submissions, assignments, updates, and resolutions. End users, technicians, and administrators can review and mark their own alerts as read.
 
 ---
 
@@ -40,7 +39,8 @@
 ### Prerequisites
 * Python 3.10+
 * Flutter SDK (3.24+)
-* Google Chrome (for web testing) or Android device / emulator
+* Node.js 20+ and npm
+* Google Chrome (or another modern browser) and/or Android device / emulator
 
 ### Step 1: Start Backend Server
 Double-click `run_backend.bat` or run:
@@ -61,19 +61,28 @@ $env:PYTHONPATH="."
 .\backend\venv\Scripts\python.exe backend\seed.py
 ```
 
-### Step 3: Run Flutter Web Application
-Double-click `run_web.bat` or run:
+### Step 3: Run the React Admin / Technician Portal
+Double-click `run_admin_web.bat` or run:
+```powershell
+cd frontend\admin-web
+npm install
+npm run dev
+```
+Open the address printed by Vite (by default `http://localhost:5173`). The portal connects to `http://127.0.0.1:8000/api/v1`; set `VITE_API_URL` before starting Vite to use a different API URL.
+
+### Step 4: Run the Flutter User App (Web or Mobile)
+For web, double-click `frontend\run_web.bat` or run:
 ```powershell
 cd frontend
 flutter run -d chrome
 ```
 
-### Step 4: Run on Android (Mobile)
-Ensure an Android emulator is running or a device is connected via USB:
+For Android, ensure an emulator is running or a device is connected via USB:
 ```powershell
 cd frontend
 flutter run -d android
 ```
+For iOS, open the Flutter project in Xcode and run its iOS target.
 
 ---
 
@@ -83,18 +92,18 @@ The database comes pre-seeded with simple demo accounts for testing and defense 
 
 | Role | Username / Email | Password | Permissions & Views |
 | :--- | :--- | :--- | :--- |
-| **System Administrator** | `admin` *(or `admin@fixops.local`)* | `admin` | Full access: Dashboard KPIs, User Management & RBAC, Activity Audit Trail, Full Ticket Triage |
-| **Maintenance Technician** | `tech` *(or `tech@fixops.local`)* | `tech` | Work Orders: Claim tickets, update status (In Progress / Resolved), log resolution proof |
-| **Student / Staff (End-User)** | `user` *(or `user@fixops.local`)* | `user` | Reporting: Submit maintenance tickets, attach photo evidence, track personal ticket status |
+| **System Administrator** | `admin` *(or `admin@fixops.local`)* | `admin` | React Portal: system analytics, support tickets, user/RBAC controls, audit trail, FastAPI service logs, notifications |
+| **IT Support Technician** | `tech` *(or `tech@fixops.local`)* | `tech` | React Portal: own workload, claim unassigned tickets, update assigned ticket status and resolution notes, notifications |
+| **Student / Staff (End-User)** | `user` *(or `user@fixops.local`)* | `user` | Flutter app: report prioritized tickets, attach photo evidence, track progress, receive ticket notifications |
 
-*(Quick-login chips are also provided on the sign-in screen to autofill these credentials with a single tap).*
+*(The React portal has quick-login chips for the admin and technician demos; the Flutter user app has a separate user demo chip.)*
 
 ---
 
 ## 📁 Repository Directory Structure
 
 ```text
-Facili-Ops/
+fixops/
 ├── backend/                  # FastAPI Application
 │   ├── app/
 │   │   ├── api/              # REST Endpoints (auth, tickets, users, audit_logs, stats)
@@ -108,16 +117,11 @@ Facili-Ops/
 │   ├── requirements.txt      # Python dependencies
 │   └── seed.py               # Database seeder script
 │
-├── frontend/                 # Pure Flutter Multiplatform App (Mobile + Web)
-│   ├── lib/
-│   │   ├── core/             # API client, colors, config
-│   │   ├── models/           # Dart models (User, Ticket, AuditLog)
-│   │   ├── providers/        # State Management (Auth, Tickets, Admin)
-│   │   ├── views/            # UI Views (Login, Register, Dashboard, Tickets, Audit, Users)
-│   │   └── main.dart         # Entry point & responsive routing
-│   └── pubspec.yaml          # Flutter dependencies
+├── frontend/
+│   ├── admin-web/            # React + TypeScript admin/technician web portal
+│   └── lib/                  # Flutter cross-platform end-user app
 │
 ├── run_backend.bat           # One-click Windows backend launcher
-├── run_web.bat               # One-click Windows Flutter web launcher
+├── run_admin_web.bat         # One-click Windows React portal launcher
 └── README.md                 # System documentation
 ```
